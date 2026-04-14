@@ -3,7 +3,6 @@
 NLP-powered resume analyzer with skill gap detection, ATS scoring, and context-aware AI chat.
 Built with **React + FastAPI + PostgreSQL + Groq LLaMA 3**.
 
-🔗 **Live Demo**: *(add your Railway URL here after deploying)*
 
 ---
 
@@ -123,43 +122,7 @@ Open [http://localhost:8000/debug](http://localhost:8000/debug) — you should s
 }
 ```
 
----
 
-## Production Deployment
-
-### Backend → Railway
-
-1. Push code to GitHub
-2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub → select the `backend` folder
-3. Add a **PostgreSQL** plugin → Railway gives you a `DATABASE_URL` automatically
-4. Set environment variables in Railway dashboard:
-   ```
-   SECRET_KEY=any-long-random-string-minimum-32-chars
-   GROQ_API_KEY=gsk_your_actual_key
-   DATABASE_URL=postgresql://...    ← copy from Railway PostgreSQL plugin
-   ALLOWED_ORIGINS=https://your-app.vercel.app
-   ```
-5. Set start command:
-   ```
-   uvicorn main:app --host 0.0.0.0 --port $PORT
-   ```
-
-### Frontend → Vercel
-
-1. Push code to GitHub
-2. Go to [vercel.com](https://vercel.com) → New Project → Import your repo → select the `frontend` folder
-3. Vercel auto-detects Vite — no config needed
-4. Before deploying, update `frontend/vite.config.js` — change all proxy targets from `http://localhost:8000` to your Railway backend URL:
-   ```js
-   proxy: {
-     '/auth':   { target: 'https://your-app.railway.app', changeOrigin: true },
-     '/resume': { target: 'https://your-app.railway.app', changeOrigin: true },
-     '/chat':   { target: 'https://your-app.railway.app', changeOrigin: true },
-   }
-   ```
-5. Deploy — Vercel gives you a live URL instantly
-
----
 
 ## API Endpoints
 
@@ -189,4 +152,3 @@ Open [http://localhost:8000/debug](http://localhost:8000/debug) — you should s
 | AI | Groq LLaMA 3.3-70b-versatile |
 | Auth | JWT (python-jose) + bcrypt |
 | NLP | Custom regex + skill alias engine |
-| Deployment | Railway (backend) + Vercel (frontend) |
