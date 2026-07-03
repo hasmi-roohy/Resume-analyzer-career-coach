@@ -8,7 +8,7 @@ from core.ai_chat import quick_suggestions
 
 router = APIRouter(prefix="/resume", tags=["resume"])
 
-ALLOWED_TYPES = {".pdf", ".docx", ".doc", ".txt"}
+ALLOWED_TYPES = {".pdf", ".docx", ".txt"}
 MAX_SIZE      = 5 * 1024 * 1024  # 5 MB
 
 

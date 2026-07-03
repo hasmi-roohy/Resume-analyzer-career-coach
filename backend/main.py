@@ -9,11 +9,12 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from loguru import logger
+from core.job_refresh import start_job_refresh_scheduler, stop_job_refresh_scheduler
 from database import init_db
-from routers import auth, resume, chat
+from routers import auth, resume, chat, perfect_fit
 
 app = FastAPI(
-    title="ResumeAI",
+    title="ApplyWise",
     version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
@@ -38,23 +39,30 @@ async def global_exception_handler(request: Request, exc: Exception):
 app.include_router(auth.router)
 app.include_router(resume.router)
 app.include_router(chat.router)
+app.include_router(perfect_fit.router)
 
 
 @app.on_event("startup")
 def startup():
     init_db()
+    start_job_refresh_scheduler()
     key    = os.getenv("GROQ_API_KEY", "").strip()
     db_url = os.getenv("DATABASE_URL", "sqlite")
     db_type = "PostgreSQL" if "postgresql" in db_url or "postgres" in db_url else "SQLite"
     groq   = "SET ✓" if key and key != "gsk_your_groq_key_here" else "MISSING ✗"
-    logger.info(f"ResumeAI v2 started | DB={db_type} | GROQ={groq}")
+    logger.info(f"ApplyWise v2 started | DB={db_type} | GROQ={groq}")
     if groq == "MISSING ✗":
         logger.warning("Set GROQ_API_KEY in .env — AI chat will not work without it")
 
 
+@app.on_event("shutdown")
+def shutdown():
+    stop_job_refresh_scheduler()
+
+
 @app.get("/")
 def root():
-    return {"status": "ok", "app": "ResumeAI", "version": "2.0.0"}
+    return {"status": "ok", "app": "ApplyWise", "version": "2.0.0"}
 
 
 @app.get("/health")

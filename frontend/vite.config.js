@@ -9,6 +9,7 @@ export default defineConfig({
       '/auth':   { target: 'http://localhost:8000', changeOrigin: true },
       '/resume': { target: 'http://localhost:8000', changeOrigin: true },
       '/chat':   { target: 'http://localhost:8000', changeOrigin: true },
+      '/perfect-fit': { target: 'http://localhost:8000', changeOrigin: true },
       '/debug':  { target: 'http://localhost:8000', changeOrigin: true },
       '/health': { target: 'http://localhost:8000', changeOrigin: true },
     },

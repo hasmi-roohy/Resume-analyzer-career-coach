@@ -1,154 +1,211 @@
-# ResumeAI — AI Resume Analyzer & Career Coach
+# ApplyWise
 
-NLP-powered resume analyzer with skill gap detection, ATS scoring, and context-aware AI chat.
-Built with **React + FastAPI + PostgreSQL + Groq LLaMA 3**.
+ApplyWise is a resume analysis and job discovery app built with React, FastAPI, PostgreSQL, pgvector, and Groq.
 
+It has two main workflows:
 
----
+- **Resume Match**: upload a resume, optionally paste a job description, get ATS/JD analysis, and chat with an AI career coach.
+- **Perfect Fit**: upload only a resume and get job recommendations from cached live job data using local embeddings and pgvector retrieval.
 
 ## Features
 
-- 📄 Upload PDF, DOCX, or TXT resume
-- 🧠 NLP skill extraction — 80+ tech skills, stack aliases (MERN, MEAN, PERN auto-expand)
-- 📊 ATS score with section-by-section breakdown (contact, summary, skills, experience, format)
-- 🎯 JD matching — matched vs missing skills with synonym normalization (NodeJS → Node.js)
-- 💬 AI career coach powered by Groq LLaMA 3.3-70b — uses your full resume + JD as context
-- 🗂️ Session history — every analysis saved, reloadable from sidebar
-- 🖥️ Split panel — analysis and chat visible simultaneously
-- 🐘 PostgreSQL in production, SQLite for local dev
-
----
-
-## Project Structure
-
-```
-resume/
-├── backend/
-│   ├── core/
-│   │   ├── resume_parser.py   ← NLP engine: skill extraction, ATS scoring, section parsing
-│   │   ├── ai_chat.py         ← Groq LLaMA chat with resume context
-│   │   └── security.py        ← JWT auth + bcrypt
-│   ├── routers/
-│   │   ├── auth.py            ← POST /auth/signup, POST /auth/login
-│   │   ├── resume.py          ← Upload, analyze, list, delete sessions
-│   │   └── chat.py            ← Send message, get history
-│   ├── database.py            ← SQLAlchemy models (User, ResumeSession, ChatMessage)
-│   ├── main.py                ← FastAPI app entry point
-│   ├── requirements.txt
-│   └── .env.example
-└── frontend/
-    └── src/
-        ├── pages/
-        │   ├── Login.jsx
-        │   ├── Signup.jsx
-        │   └── Dashboard.jsx   ← Sidebar + split panel layout
-        └── components/
-            ├── UploadPanel.jsx
-            ├── AnalysisPanel.jsx
-            ├── ChatPanel.jsx
-            ├── ScoreRing.jsx
-            ├── ScoreBar.jsx
-            └── SkillPill.jsx
-```
-
----
-
-## Local Setup
-
-### Prerequisites
-- Python 3.10+
-- Node.js 18+
-- Groq API key (free at [console.groq.com](https://console.groq.com))
-
-### Backend
-
-**Windows:**
-```powershell
-cd backend
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-```
-
-**Mac / Linux:**
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
-**Create `.env` file:**
-```powershell
-# Windows
-python -c "open('.env','w',encoding='utf-8').write('SECRET_KEY=change-this-to-any-long-random-string\nGROQ_API_KEY=gsk_your_key_here\nDATABASE_URL=sqlite:///./resumeai.db\nALLOWED_ORIGINS=http://localhost:5173\n')"
-```
-```bash
-# Mac / Linux
-cp .env.example .env
-```
-
-Open `.env` and replace `gsk_your_key_here` with your real key from [console.groq.com](https://console.groq.com).
-
-**Start server:**
-```bash
-uvicorn main:app --reload
-```
-
-Terminal should show:
-```
-INFO  ResumeAI v2 started | DB=SQLite | GROQ=SET ✓
-```
-
-API docs available at: [http://localhost:8000/docs](http://localhost:8000/docs)
-
-### Frontend
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-Open [http://localhost:5173](http://localhost:5173)
-
-### Verify everything works
-
-Open [http://localhost:8000/debug](http://localhost:8000/debug) — you should see:
-```json
-{
-  "groq_key_set": true,
-  "database_type": "SQLite"
-}
-```
-
-
-
-## API Endpoints
-
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| POST | /auth/signup | No | Register new user |
-| POST | /auth/login | No | Login → returns JWT |
-| GET | /auth/me | Yes | Get current user |
-| POST | /resume/upload | Yes | Upload resume + analyze |
-| GET | /resume/sessions | Yes | List all past sessions |
-| GET | /resume/session/{id} | Yes | Load session + chat history |
-| DELETE | /resume/session/{id} | Yes | Delete session |
-| POST | /chat/message | Yes | Send message to AI |
-| GET | /chat/history/{id} | Yes | Get full chat history |
-| GET | /health | No | Health check |
-| GET | /debug | No | Check config (dev only) |
-
----
+- PDF, DOCX, and TXT resume upload
+- ATS scoring and section-level feedback
+- Job description skill matching
+- AI chat with resume and JD context
+- Resume Match history
+- Perfect Fit resume-only job recommendations
+- Cached live jobs from free APIs
+- PostgreSQL + pgvector similarity search
+- Scheduled job cache refresh
+- JWT authentication
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+| --- | --- |
 | Frontend | React 18, Vite, React Router |
-| Backend | FastAPI, SQLAlchemy, Pydantic |
-| Database | PostgreSQL (prod) / SQLite (dev) |
-| AI | Groq LLaMA 3.3-70b-versatile |
-| Auth | JWT (python-jose) + bcrypt |
-| NLP | Custom regex + skill alias engine |
+| Backend | FastAPI, SQLAlchemy |
+| Database | PostgreSQL 18 |
+| Vector Search | pgvector |
+| AI Chat | Groq |
+| Resume Parsing | pdfminer.six, python-docx, custom skill extraction |
+| Job Sources | Arbeitnow, Remotive, Remote OK, optional Adzuna |
+
+## Project Structure
+
+```text
+resume/
+  backend/
+    main.py                    FastAPI app entry
+    database.py                SQLAlchemy models and pgvector setup
+    routers/
+      auth.py                  Signup, login, current user
+      resume.py                Resume Match upload/history
+      chat.py                  AI career coach
+      perfect_fit.py           Perfect Fit upload endpoint
+    core/
+      resume_parser.py         Text extraction, skills, ATS/JD analysis
+      ai_chat.py               Groq chat logic
+      perfect_fit.py           Job fetch, cache, embeddings, ranking
+      job_refresh.py           Scheduled job cache refresh
+      security.py              JWT and password hashing
+    tests/
+      test_perfect_fit.py      Perfect Fit unit tests
+  frontend/
+    src/
+      App.jsx                  Routes
+      styles.css               Shared UI styles
+      context/AuthContext.jsx  Auth state
+      api/client.js            API client
+      pages/
+        Login.jsx
+        Signup.jsx
+        Dashboard.jsx
+      components/
+        UploadPanel.jsx
+        AnalysisPanel.jsx
+        ChatPanel.jsx
+        PerfectFitPanel.jsx
+```
+
+## Environment
+
+Create `backend/.env`:
+
+```env
+SECRET_KEY=change-this-to-a-long-random-string
+GROQ_API_KEY=your_groq_key
+DATABASE_URL=postgresql://resume:resume123@localhost:5432/resume
+ALLOWED_ORIGINS=http://localhost:5173
+```
+
+Optional Adzuna keys:
+
+```env
+ADZUNA_APP_ID=your_app_id
+ADZUNA_APP_KEY=your_app_key
+```
+
+Optional Perfect Fit settings:
+
+```env
+PERFECT_FIT_REFRESH_HOURS=6
+PERFECT_FIT_DISABLE_SCHEDULER=false
+PERFECT_FIT_ALLOW_MODEL_DOWNLOAD=false
+```
+
+## PostgreSQL Requirements
+
+PostgreSQL must have pgvector enabled in the `resume` database:
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+```
+
+Verify:
+
+```sql
+SELECT extname, extversion
+FROM pg_extension
+WHERE extname = 'vector';
+```
+
+Expected:
+
+```text
+vector | 0.8.4
+```
+
+## Run Locally
+
+Start backend:
+
+```cmd
+cd C:\Users\honey\Desktop\resume\backend
+.\venv\Scripts\activate
+python -m uvicorn main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Start frontend in another terminal:
+
+```cmd
+cd C:\Users\honey\Desktop\resume\frontend
+npm run dev
+```
+
+Open:
+
+```text
+http://localhost:5173
+```
+
+Backend docs:
+
+```text
+http://localhost:8000/docs
+```
+
+## Perfect Fit RAG Flow
+
+```text
+Resume upload
+  -> extract resume text and skills
+  -> infer likely role
+  -> refresh cached jobs from free APIs
+  -> store jobs in PostgreSQL
+  -> store job embeddings in pgvector
+  -> compare resume embedding with job embeddings
+  -> rank jobs by vector similarity and skill overlap
+  -> show recommendations in the UI
+```
+
+Perfect Fit uses cached job data because job postings change often. The job cache has expiry fields and a scheduled refresh. Resume Match history is stored because resume/JD analysis is stable; Perfect Fit results should be treated as current recommendations, not permanent job truth.
+
+## Useful Checks
+
+Run backend tests:
+
+```cmd
+cd C:\Users\honey\Desktop\resume\backend
+.\venv\Scripts\activate
+python -m unittest discover -s tests -v
+```
+
+Check pgvector job embeddings:
+
+```sql
+SELECT
+  COUNT(*) AS total_jobs,
+  COUNT(embedding) AS jobs_with_embeddings,
+  COUNT(dedupe_key) AS jobs_with_dedupe_key
+FROM job_postings;
+```
+
+Check API health:
+
+```text
+http://localhost:8000/health
+```
+
+## API Overview
+
+| Method | Path | Auth | Purpose |
+| --- | --- | --- | --- |
+| POST | `/auth/signup` | No | Create account |
+| POST | `/auth/login` | No | Login |
+| GET | `/auth/me` | Yes | Current user |
+| POST | `/resume/upload` | Yes | Resume Match upload |
+| GET | `/resume/sessions` | Yes | Resume Match history |
+| GET | `/resume/session/{id}` | Yes | Load Resume Match session |
+| DELETE | `/resume/session/{id}` | Yes | Delete Resume Match session |
+| POST | `/chat/message` | Yes | Send AI chat message |
+| POST | `/perfect-fit/upload` | Yes | Resume-only job recommendations |
+| GET | `/health` | No | Health check |
+| GET | `/debug` | No | Development config check |
+
+## Notes
+
+- `frontend/dist/` is generated by `npm run build` and is not needed in source control.
+- `frontend/node_modules/` and `backend/venv/` are local dependency folders and are ignored by Git.
+- `backend/.env` contains secrets and must not be committed.

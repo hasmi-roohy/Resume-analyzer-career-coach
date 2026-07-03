@@ -26,7 +26,7 @@ def extract_text(filename: str, data: bytes) -> str:
     fn = filename.lower()
     if fn.endswith(".pdf"):
         return extract_text_pdf(data)
-    elif fn.endswith(".docx") or fn.endswith(".doc"):
+    elif fn.endswith(".docx"):
         return extract_text_docx(data)
     elif fn.endswith(".txt"):
         return data.decode("utf-8", errors="ignore")

@@ -9,7 +9,7 @@ export default function ScoreRing({ score = 0, size = 100, label = '', color }) 
     <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6 }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         <circle cx={size/2} cy={size/2} r={r}
-          fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={7}/>
+          fill="none" stroke="#e5e7eb" strokeWidth={7}/>
         <circle cx={size/2} cy={size/2} r={r}
           fill="none" stroke={c} strokeWidth={7}
           strokeDasharray={`${dash} ${circ}`}
@@ -18,12 +18,12 @@ export default function ScoreRing({ score = 0, size = 100, label = '', color }) 
           style={{ transition:'stroke-dasharray 0.6s ease' }}/>
         <text x={size/2} y={size/2}
           textAnchor="middle" dominantBaseline="central"
-          fontSize={size * 0.22} fontWeight={700} fill="#fff">
+          fontSize={size * 0.22} fontWeight={800} fill="#172033">
           {s}
         </text>
       </svg>
       {label && (
-        <span style={{ fontSize:11, color:'rgba(255,255,255,0.45)',
+        <span style={{ fontSize:11, color:'#667085', fontWeight:800,
                        textTransform:'uppercase', letterSpacing:'0.07em' }}>
           {label}
         </span>
